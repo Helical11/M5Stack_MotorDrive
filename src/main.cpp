@@ -23,22 +23,23 @@
 /* Define GPIO pins connected to P-NUCLEO-IHM001 */
 /* Hall sensors */
 /* Note: H1, H2, and H3 becomes 1 (high) when they detect a south pole. */
-#define H1      3
-#define H2      1
-#define H3      16
+#define H1      17
+#define H2      35
+#define H3      36
 
 /* Enable (deblock) signals */
-#define EN1     23
-#define EN2     19
-#define EN3     18
+#define EN1     21
+#define EN2     22
+#define EN3     16
 
 /* Input (gate) signals */
 /* Assign GPIO pins capable of hardware PWM */
 /* PWM0: GPIO2, 5 for U- and W-phases V */
 /* PWM1: GPIO25 for V-phase */
 #define IN1     2
+[fis]Change pin
 #define IN2     5
-#define IN3     25
+#define IN3     26
 #define IN1PWM  0
 #define IN2PWM  2
 #define IN3PWM  4
@@ -47,8 +48,8 @@
 #define SEC1    25
 
 /* Constant aliases */
-#define GB      0
-#define DEB     1
+ int GB =  0x0;
+ int DEB = 0x1;
 
 /* Motor status */
 #define STILL   0
