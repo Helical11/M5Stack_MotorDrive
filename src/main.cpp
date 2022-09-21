@@ -37,7 +37,6 @@
 /* PWM0: GPIO2, 5 for U- and W-phases V */
 /* PWM1: GPIO25 for V-phase */
 #define IN1     2
-[fis]Change pin
 #define IN2     5
 #define IN3     26
 #define IN1PWM  0
@@ -89,9 +88,9 @@ void setup() {
     digitalWrite(EN3,GB);
 
 /*The setup PWM pin*/
-    ledcSetup(IN1PWM,20000,8);
-    ledcSetup(IN2PWM,20000,8);
-    ledcSetup(IN3PWM,20000,8);
+    ledcSetup(IN1PWM,F_PWM,8);
+    ledcSetup(IN2PWM,F_PWM,8);
+    ledcSetup(IN3PWM,F_PWM,8);
     pinMode(IN1,OUTPUT);
     pinMode(IN2,OUTPUT);
     pinMode(IN3,OUTPUT);
@@ -233,10 +232,10 @@ void forcedCommutate(unsigned num, unsigned polePair, uint32_t tick_f)
     for (i = 0; i < num * polePair; i++) {
         for (sector = 0; sector < 6; sector++) {
             /* Choose sector one by one and wait */
-            tick = millis();
+            tick = micros();
             produceSignal(sector + 1);
             Serial.println(tick);
-            while(millis() - tick < tick_f);
+            while(micros() - tick < tick_f);
         }
     }
 }
