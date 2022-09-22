@@ -11,9 +11,9 @@
 
 /* Define motor and drive parameter */
 #define P_PAIR  7       /* Number of pole pairs */
-#define F_PWM   15000   /* [Hz], PWM carrier frequency */
+#define F_PWM   20000   /* [Hz], PWM carrier frequency */
 #define MOD_I   400000  /* modulaiton index at the start of 6-pulse control: Note unity = 1,000,000 */
-#define NUM_F   8       /* Number of turns in terms for initial forced commutation */
+#define NUM_F   1000    /* Number of turns in terms for initial forced commutation */
 #define MOD_F   400000  /* Modulation index for initial forced commutation: Note unity = 1,000,000 */
 #define TICK_F  100     /* [microseconds] to stay in a section */
 #define D_MOD   20000   /* Change of modulation index by one command */
