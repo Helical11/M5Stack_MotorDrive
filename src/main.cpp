@@ -99,24 +99,26 @@ void setup() {
     ledcAttachPin(IN3,IN3PWM);
 
   M5.begin();
+  M5.Power.begin();
   Serial.begin(115200);
+  M5.Lcd.fillScreen(WHITE);
 
 }
 
 /* The main function */
 void loop() {
     /* Show initial message */
-    Serial.println("=====================================================");
-    Serial.println(" bldc6p - BLDC motor 6-pulse control by Raspberry Pi ");
-    Serial.println(" (c) 2021 @RR_Inyo                                   ");
-    Serial.println("=====================================================");
-    Serial.println("Commands:                                            ");
-    Serial.println("  s: Start motor                                     ");
-    Serial.println("  h: Stop motor                                      ");
-    Serial.println("  r: Raise modulation index                          ");
-    Serial.println("  l: Lower modulation index                          ");
-    Serial.println("  t: Show rotational speed                           ");
-    Serial.println("  e: End this program                                ");
+    M5.Lcd.print("=====================================================");
+    M5.Lcd.print(" bldc6p - BLDC motor 6-pulse control by Raspberry Pi ");
+    M5.Lcd.print(" (c) 2021 @RR_Inyo                                   ");
+    M5.Lcd.print("=====================================================");
+    M5.Lcd.print("Commands:                                            ");
+    M5.Lcd.print("  s: Start motor                                     ");
+    M5.Lcd.print("  h: Stop motor                                      ");
+    M5.Lcd.print("  r: Raise modulation index                          ");
+    M5.Lcd.print("  l: Lower modulation index                          ");
+    M5.Lcd.print("  t: Show rotational speed                           ");
+    M5.Lcd.print("  e: End this program                                ");
 
     /* Infinate loop, outer */
     while(1) {
@@ -127,11 +129,11 @@ void loop() {
         }
 
         /* Forced commutation to start up */
-        Serial.println("Trying forced commutation...");
+        M5.Lcd.print("Trying forced commutation...");
         mod = MOD_F;
         forcedCommutate(NUM_F, P_PAIR, TICK_F);
 
-        Serial.println("Succeeded in getting into the 6-pulse (120-degree) control mode by ISR callback functions.");
+        M5.Lcd.print("Succeeded in getting into the 6-pulse (120-degree) control mode by ISR callback functions.");
 
         /* Infinate loop, inner */
         while(st == RUNNING) {
@@ -146,79 +148,85 @@ void loop() {
 /* Function to process command from user */
 void processCommand()
 {
-    int c;
+    int c = 0;
     int j = 0;
     uint64_t tick_ave = 0;
 
     /* Show prompt */
-    Serial.println("bldc6p>> ");
+    M5.Lcd.print("bldc6p>> ");
 
     /* Obtain input */
     while(1) {
         /* Get char from stdin */
-        if ( Serial.available() > 0) {
+        M5.update();
+        M5.Lcd.print(c);
 
-        c = Serial.read();
+        if ( M5.BtnA.wasPressed() ) {
+
+        c = 1;
+
+        }
 
         /* Process obtained command */
         switch (c) {
-            case 's':   /* Start motor */
+            case 1:   /* Start motor */
                 if (st == RUNNING) {
-                    Serial.println("Motor already running.");
+                    M5.Lcd.print("Motor already running.");
                 }
                 else if (st == STILL) {
                     st = RUNNING;
-                    Serial.println("Starting motor...");
+                    M5.Lcd.print("Starting motor...");
                 }
                 return;
-            case 'h':   /* Stop (halt) motor */
+            case 2:   /* Stop (halt) motor */
                 if (st == RUNNING) {
                     st = STILL;
-                    Serial.println("Stopping motor...");
+                    M5.Lcd.print("Stopping motor...");
                 }
                 else if (st == STILL) {
-                    Serial.println("Motor already standstill.");
+                    M5.Lcd.print("Motor already standstill.");
                 }
                 return;
 
-            case 'r':   /* Raise modulation index */
+            case 3:   /* Raise modulation index */
                 mod += D_MOD;
                 if (mod > 1000000) {
                     mod = 1000000;
                 }
-//                Serial.println("Modulation index raised up to: %.2f", mod / 1000000);
+//                M5.Lcd.print("Modulation index raised up to: %.2f", mod / 1000000);
                 return;
 
-            case 'l':   /* Lower modulation index */
+            case 4:   /* Lower modulation index */
                 mod -= D_MOD;
                 if (mod < 0) {
                     mod = 0;
                 }
-//                Serial.println("Modulation index lowered down to: %.2f", mod / 1000000);
+//                M5.Lcd.print("Modulation index lowered down to: %.2f", mod / 1000000);
                 return;
 
-            case 't':   /* Show rotational speed */
+            case 5:   /* Show rotational speed */
                 for(j = 0; j < MAF; j++) {
                     tick_ave += tick_diff[j];
                 }
                 tick_ave /= MAF;
-//                Serial.println("Average tick difference for one electrical rotation: %d microsec", tick_ave);
-//                Serial.println("Rotational speed: %.2f Hz", 1 / (tick_ave / 1e6) / (long)P_PAIR);
-//                Serial.println("Rotational speed: %.2f rpm", 60.0 / (tick_ave / 1e6) / (long)P_PAIR);
+//                M5.Lcd.print("Average tick difference for one electrical rotation: %d microsec", tick_ave);
+//                M5.Lcd.print("Rotational speed: %.2f Hz", 1 / (tick_ave / 1e6) / (long)P_PAIR);
+//                M5.Lcd.print("Rotational speed: %.2f rpm", 60.0 / (tick_ave / 1e6) / (long)P_PAIR);
                 return;
 
-            case 'e':   /* Exit from this program */
-                Serial.println("Exiting from the program...");
+            case 6:   /* Exit from this program */
+                M5.Lcd.print("Exiting from the program...");
                 gateBlock();
                 exit(0);
 
-            case '\n':
+            case 0:
                 break;
 
             default:
-                Serial.println("Unknown command.");
+                M5.Lcd.print("Unknown command.");
         }
-        }
+
+        delay(100);
     }
 }
 
@@ -234,7 +242,7 @@ void forcedCommutate(unsigned num, unsigned polePair, uint32_t tick_f)
             /* Choose sector one by one and wait */
             tick = micros();
             produceSignal(sector + 1);
-            Serial.println(tick);
+//            M5.Lcd.print(tick);
             while(micros() - tick < tick_f);
         }
     }
